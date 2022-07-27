@@ -1,0 +1,32 @@
+<div class="col-md-auto p-2">
+    <select class="form-select" aria-label="Default select year" id="yyyy">
+        <option hidden value="2000">年を選択</option>
+        {% for i in range(2010, 2023) %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>
+
+    <select class="form-select" aria-label="Default select month" id="mm">
+        <option hidden value="20">月を選択</option>
+        {% for i in range(1, 13) %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="button" class="btn btn-primary" onclick="jump()">記事表示</button>
+</div>
+
+
+<script>
+    function jump() {
+        const yyyy = document.getElementById("yyyy").value;
+        const mm = document.getElementById("mm").value;
+
+        if ((2009 < yyyy && yyyy < 2023) &&
+            (0 < mm && mm < 13)) {
+            window.location.href = `/${yyyy}/${mm}`;
+        } else {
+            alert("年月を選択！");
+        }
+    }
+</script>

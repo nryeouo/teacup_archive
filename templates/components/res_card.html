@@ -1,0 +1,8 @@
+<div class="article">
+    <h3><a href="/post/{{ article_id }}">{{ article_title }}</a></h3>
+    <h5 class="text-muted" title="{{ author_remote_addr }}">{{ author_name }} · {{ created_at }}</h5>
+    <p>
+        {{ article_text | break_line }}
+    </p>
+    <hr>
+</div>

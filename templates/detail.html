@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>mtm掲示板過去ログ</title>
+    {% include "components/header.html" %}
+</head>
+<body>
+<!-- Navbar -->
+{% with title=title %}
+    {% include "components/navbar.html" %}
+{% endwith %}
+<div class="container-md">
+    <div class="row justify-content-center mt-2">
+        <!-- Result -->
+        <div class="col">
+            <h3>{{ res.article_title }}</h3>
+            <h5 class="text-muted">投稿者: {{ res.author_name }}<br>
+                日時: {{ res.created_at }}</h5>
+            <hr>
+            <p>{{ res.article_text | break_line }}</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

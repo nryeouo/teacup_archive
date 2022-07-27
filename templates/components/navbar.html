@@ -1,0 +1,14 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm sticky-top">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-2 h1 navbar-title">mtm過去ログ - {{ title }}</span>
+        {% if topbutton %}
+        <button class="btn btn-outline-primary" onclick="scroll_to_top()">上へ</button>
+        {% endif %}
+    </div>
+</nav>
+
+<script>
+    function scroll_to_top(){
+	window.scroll({top: 0, behavior: 'smooth'});
+}
+</script>
