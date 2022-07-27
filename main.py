@@ -51,7 +51,3 @@ def view_one_article(article_id):
     res = cur.fetchone()
     cur.close()
     return render_template("detail.html", res=res, title="投稿詳細")
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8001, debug=True)
