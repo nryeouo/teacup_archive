@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>mtm掲示板過去ログ</title>
+    {% include "components/header.html" %}
+</head>
+<body>
+<!-- Navbar -->
+{% with title=title, topbutton="1" %}
+    {% include "components/navbar.html" %}
+{% endwith %}
+<div class="container-md">
+    <div class="row justify-content-center mt-2">
+        <!-- Picker -->
+        {% include "components/date_picker.html" %}
+
+        <!-- Result -->
+        {% with rows=rows, pagination=pagination %}
+            {% include "components/search_response_area.html" %}
+        {% endwith %}
+    </div>
+</div>
+</body>
+</html>

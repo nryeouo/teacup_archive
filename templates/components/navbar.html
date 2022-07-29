@@ -1,14 +1,29 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light shadow-sm sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top" style="background-color: ivory;">
     <div class="container-fluid">
-        <span class="navbar-brand mb-2 h1 navbar-title">mtm過去ログ - {{ title }}</span>
-        {% if topbutton %}
-        <button class="btn btn-outline-primary" onclick="scroll_to_top()">上へ</button>
-        {% endif %}
+        <a class="navbar-brand h1 navbar-title">mtm過去ログ - {{ title }}</a>
+        <form class="d-flex">
+            <input class="form-control me-2" type="search" placeholder="本文検索" aria-label="Search" id="searchBox">
+            <button class="btn btn-primary me-2" onclick="search()" type="button">Search</button>
+            {% if topbutton %}
+                <button class="btn btn-outline-primary" onclick="scroll_to_top()">Top</button>
+            {% endif %}
+        </form>
+
     </div>
 </nav>
 
 <script>
-    function scroll_to_top(){
-	window.scroll({top: 0, behavior: 'smooth'});
-}
+    function scroll_to_top() {
+        window.scroll({top: 0, behavior: 'smooth'});
+    }
+
+    function search() {
+        const query = document.getElementById("searchBox").value;
+        if (query) {
+            window.location = `/search?q=${query}`;
+        } else {
+            alert("!");
+        }
+    }
+
 </script>

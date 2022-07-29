@@ -1,6 +1,7 @@
 <div class="col-md-9">
-    {% if rows %}
-        <div class="alert alert-primary mt-2">{{ title }}: {{ rows | length }}件の結果</div>
+    {% if pagination %}
+        <div class="alert alert-primary mt-2">{{ title }}: {{ pagination.info }}</div>
+        {{ pagination.links }}
     {% endif %}
     {% for line in rows %}
         {% with article_title=line.article_title,
