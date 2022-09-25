@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, request, render_template, g, Markup
 from flask_paginate import Pagination, get_page_parameter
 
@@ -7,6 +9,11 @@ from dateutil.relativedelta import relativedelta
 
 dbfile = "static/teacup_articles.sqlite"
 time_fmt = "%F %T"
+
+word_regex = r"^([^(since|until|by)].+?(?= (since|until|by)))"
+since_regex = r"^.+since:(20\d{2}-[0-1]\d-[0-3]\d)"
+until_regex = r"^.+until:(20\d{2}-[0-1]\d-[0-3]\d)"
+by_regex = r"^.+by:(.+)? "
 
 
 def connect_db():
@@ -57,19 +64,34 @@ def view_one_article(article_id):
 @app.route("/search")
 def view_search_results():
     query = request.args.get("q")
+
     if len(query) > 0:
-        conn = connect_db()
-        cur = conn.execute("select article_title, author_name, author_remote_addr, \
-         strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
-          from articles where article_text like ?", ("%"+query+"%",))
-        res = cur.fetchall()
-        cur.close()
-        page = request.args.get(get_page_parameter(), type=int, default=1)
-        res_p = res[(page-1)*25: page*25]
-        page_disp_msg = "{total}件の結果。{start}から{end}件目を表示中"
-        pagination = Pagination(page=page, total=len(res), per_page=25,
-                                css_framework="bootstrap5", display_msg=page_disp_msg)
-        return render_template("index_paginate.html", rows=res_p, pagination=pagination,
-                               title=query, total=len(res))
+        word_s = re.search(word_regex, query)
+        word = word_s.group(1) if word_s else ""
+
+        if len(word) > 0:
+            conn = connect_db()
+
+            since_s = re.search(since_regex, query)
+            until_s = re.search(until_regex, query)
+            by_s = re.search(by_regex, query)
+
+            since = since_s.group(1) if since_s else "2010-06-01"
+            until = until_s.group(1) if until_s else "2022-07-31"
+            by = f"%{by_s.group(1)}%" if by_s else "%"
+
+            cur = conn.execute("select article_title, author_name, author_remote_addr, \
+             strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
+              from articles where article_text like ? and created_at > ? and created_at < ? \
+               and author_name like ?", ("%"+word+"%", since, until, by))
+            res = cur.fetchall()
+            cur.close()
+            page = request.args.get(get_page_parameter(), type=int, default=1)
+            res_p = res[(page-1)*25: page*25]
+            page_disp_msg = "{total}件の結果。{start}から{end}件目を表示中"
+            pagination = Pagination(page=page, total=len(res), per_page=25,
+                                    css_framework="bootstrap5", display_msg=page_disp_msg)
+            return render_template("index_paginate.html", rows=res_p, pagination=pagination,
+                                   title=query, total=len(res))
     else:
         return render_template("index.html", title="トップ")
