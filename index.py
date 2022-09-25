@@ -10,10 +10,10 @@ from dateutil.relativedelta import relativedelta
 dbfile = "static/teacup_articles.sqlite"
 time_fmt = "%F %T"
 
-word_regex = r"^([^(since|until|by)].+?(?= (since|until|by)))"
-since_regex = r"^.+since:(20\d{2}-[0-1]\d-[0-3]\d)"
-until_regex = r"^.+until:(20\d{2}-[0-1]\d-[0-3]\d)"
-by_regex = r"^.+by:(.+)? "
+word_regex = r"^([^(since|until|by)].+?)(?=$| (since|until|by))"
+since_regex = r"^\S.* since:(20\d{2}-[0-1]\d-[0-3]\d)"
+until_regex = r"^\S.* until:(20\d{2}-[0-1]\d-[0-3]\d)"
+by_regex = r"^\S.* by:(.+?($| ))"
 
 
 def connect_db():
@@ -65,7 +65,8 @@ def view_one_article(article_id):
 def view_search_results():
     query = request.args.get("q")
 
-    if len(query) > 0:
+    if query:
+        print(query)
         word_s = re.search(word_regex, query)
         word = word_s.group(1) if word_s else ""
 
@@ -78,12 +79,12 @@ def view_search_results():
 
             since = since_s.group(1) if since_s else "2010-06-01"
             until = until_s.group(1) if until_s else "2022-07-31"
-            by = f"%{by_s.group(1)}%" if by_s else "%"
+            by = f"%{(by_s.group(1))}%" if by_s else "%"
 
             cur = conn.execute("select article_title, author_name, author_remote_addr, \
              strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
-              from articles where article_text like ? and created_at > ? and created_at < ? \
-               and author_name like ?", ("%"+word+"%", since, until, by))
+              from articles where article_text like ? and created_at >= ? and created_at <= ? \
+               and author_name like ?", ("%"+str(word)+"%", str(since), str(until), str(by)))
             res = cur.fetchall()
             cur.close()
             page = request.args.get(get_page_parameter(), type=int, default=1)
@@ -93,5 +94,9 @@ def view_search_results():
                                     css_framework="bootstrap5", display_msg=page_disp_msg)
             return render_template("index_paginate.html", rows=res_p, pagination=pagination,
                                    title=query, total=len(res))
+        else:
+            return render_template("index.html", title="トップ")
     else:
         return render_template("index.html", title="トップ")
+
+# app.run(host='0.0.0.0', port=8901, debug=True)

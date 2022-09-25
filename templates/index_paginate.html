@@ -20,6 +20,10 @@
         {% with rows=rows, pagination=pagination %}
             {% include "components/search_response_area.html" %}
         {% endwith %}
+
+        {% if rows |length ==0 %}
+            {% include "components/tip.html" %}
+        {% endif %}
     </div>
 </div>
 </body>

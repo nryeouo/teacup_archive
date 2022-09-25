@@ -20,6 +20,9 @@
         {% with rows=rows %}
             {% include "components/response_area.html" %}
         {% endwith %}
+        {% if rows |length ==0 %}
+            {% include "components/tip.html" %}
+        {% endif %}
     </div>
 </div>
 </body>
