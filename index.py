@@ -106,4 +106,4 @@ def view_search_results():
     else:
         return render_template("index.html", title="トップ")
 
-app.run(host='0.0.0.0', port=8901, debug=True)
+# app.run(host='0.0.0.0', port=8901, debug=True)
