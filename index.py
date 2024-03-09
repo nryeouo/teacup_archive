@@ -1,7 +1,9 @@
 import re
 
-from flask import Flask, request, render_template, g, Markup
+from flask import Flask, request, render_template, g
 from flask_paginate import Pagination, get_page_parameter
+
+from markupsafe import Markup
 
 import sqlite3
 import datetime
@@ -24,6 +26,22 @@ def connect_db():
         db.row_factory = sqlite3.Row
     return db
 
+
+def parse_query(query):
+    operators = ["since", "until", "by", "title"]
+    parsed_query = {}
+    search_term = None
+
+    query_parts = query.split()
+    if query_parts:
+        search_term = query_parts.pop(0)  # 検索語を取得
+
+    for part in query_parts:
+        for operator in operators:
+            if part.startswith(operator + ':'):
+                parsed_query[operator] = part.split(':')[1]
+                break
+    return search_term, parsed_query
 
 app = Flask(__name__)
 
@@ -68,41 +86,49 @@ def view_search_results():
     query = request.args.get("q")
 
     if query:
-        word_s = re.search(word_regex, query)
-        word = word_s.group(1) if word_s else ""
-        print("Word=" + word + ".")
+        conn = connect_db()
 
-        if len(word) > 0:
-            since_s = re.search(since_regex, query)
-            until_s = re.search(until_regex, query)
-            by_s = re.search(by_regex, query)
-            title_s = re.search(title_regex, query)
+        # query and parameters are Written by ChatGPT
+        # 与えられた演算子が None の場合、その条件を無視する
+        query_to_execute = """
+            SELECT article_title, author_name, author_remote_addr,
+                strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at,
+                article_text, article_id
+            FROM articles
+            WHERE article_text LIKE ?
+            AND (created_at >= ? OR ? IS NULL)
+            AND (created_at <= ? OR ? IS NULL)
+            AND (author_name LIKE ? OR ? IS NULL)
+            AND (article_title LIKE ? OR ? IS NULL)
+        """
 
-            since = since_s.group(1) if since_s else "2010-06-01"
-            until = until_s.group(1) if until_s else "2022-07-31"
-            by = f"%{(by_s.group(1))}%" if by_s else "%"
-            title = f"%{(title_s.group(1))}%" if title_s else "%"
+        # parse_query 関数を使用して検索語と演算子の値を取得
+        search_term, parsed_query = parse_query(query)
 
-            conn = connect_db()
+        # パラメータの設定
+        parameters = [
+            "%" + search_term + "%",  # 検索語
+            str(parsed_query.get("since", "2010-06-01")),  # since の値またはデフォルト値
+            str(parsed_query.get("since", "2010-06-01")),  # since の値またはデフォルト値
+            str(parsed_query.get("until", "2022-07-31")),  # until の値またはデフォルト値
+            str(parsed_query.get("until", "2022-07-31")),  # until の値またはデフォルト値
+            "%" + parsed_query.get("by", "") + "%",  # by の値または空文字列
+            "%" + parsed_query.get("by", "") + "%",  # by の値または空文字列
+            "%" + parsed_query.get("title", "") + "%",  # title の値または空文字列
+            "%" + parsed_query.get("title", "") + "%"  # title の値または空文字列
+        ]
 
+        cur = conn.execute(query_to_execute, parameters)
 
-            cur = conn.execute("select article_title, author_name, author_remote_addr, \
-             strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
-              from articles where article_text like ? and created_at >= ? and created_at <= ? \
-               and author_name like ? and article_title like ?",
-                                   ("%" + str(word) + "%", str(since), str(until), str(by), str(title)))
-
-            res = cur.fetchall()
-            cur.close()
-            page = request.args.get(get_page_parameter(), type=int, default=1)
-            res_p = res[(page - 1) * 25: page * 25]
-            page_disp_msg = "{total}件の結果。{start}から{end}件目を表示中"
-            pagination = Pagination(page=page, total=len(res), per_page=25,
-                                    css_framework="bootstrap5", display_msg=page_disp_msg)
-            return render_template("index_paginate.html", rows=res_p, pagination=pagination,
-                                   title=query, total=len(res))
-        else:
-            return render_template("index.html", title="トップ")
+        res = cur.fetchall()
+        cur.close()
+        page = request.args.get(get_page_parameter(), type=int, default=1)
+        res_p = res[(page - 1) * 25: page * 25]
+        page_disp_msg = "{total}件の結果。{start}から{end}件目を表示中"
+        pagination = Pagination(page=page, total=len(res), per_page=25,
+                                css_framework="bootstrap5", display_msg=page_disp_msg)
+        return render_template("index_paginate.html", rows=res_p, pagination=pagination,
+                                title=query, total=len(res))
     else:
         return render_template("index.html", title="トップ")
 

@@ -1,20 +1,20 @@
-<div class="col-md-9">
-    {% if pagination %}
-        <div class="alert alert-primary mt-2">{{ title }}: {{ pagination.info }}</div>
-        {{ pagination.links }}
-    {% endif %}
-    {% for line in rows %}
-        {% with article_title=line.article_title,
-                author_name=line.author_name,
-                created_at=line.created_at,
-                author_remote_addr=line.author_remote_addr,
-                article_text=line.article_text,
-                article_id=line.article_id %}
-            {% include "components/res_card.html" %}
-        {% endwith %}
-    {% endfor %}
-    {% if pagination %}
-        {{ pagination.info }}
-        {{ pagination.links }}
-    {% endif %}
+{% if pagination %}
+    <div class="alert alert-primary mt-2">{{ title }}: {{ pagination.info }}</div>
+    {{ pagination.links }}
+{% endif %}
+<div>
+{% for line in rows %}
+    {% with article_title=line.article_title,
+            author_name=line.author_name,
+            created_at=line.created_at,
+            author_remote_addr=line.author_remote_addr,
+            article_text=line.article_text,
+            article_id=line.article_id %}
+        {% include "components/res_card.html" %}
+    {% endwith %}
+{% endfor %}
 </div>
+{% if pagination %}
+    {{ pagination.info }}
+    {{ pagination.links }}
+{% endif %}

@@ -1,20 +1,30 @@
-<nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top" style="background-color: ivory;">
+<nav class="navbar fixed-top navbar-expand-sm shadow mb-3" style="background-color: ivory;">
     <div class="container-fluid">
-        <a class="navbar-brand h1 navbar-title">mtm過去ログ - {{ title }}</a>
-        <form class="d-flex">
-            <input class="form-control me-2" type="search" placeholder="本文検索" aria-label="Search" id="searchBox">
-            <button class="btn btn-primary me-2" onclick="search()" type="button">Search</button>
-            {% if topbutton %}
-                <button class="btn btn-outline-primary" onclick="scroll_to_top()">Top</button>
-            {% endif %}
-        </form>
-
+        <a class="navbar-brand" href="/"><i class="bi bi-train-front-fill text-primary"></i> mtm過去ログ</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02"
+            aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <span class="navbar-text text-nowrap overflow-x-hidden col me-auto">
+                <i class="bi bi-geo-alt-fill"></i> {{ title }}
+            </span>
+            <form class="d-flex col-sm-6" role="search">
+                <input class="form-control me-2" type="search" placeholder="本文検索" aria-label="Search" id="searchBox">
+                <button class="btn btn-primary me-2" onclick="search()" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <button class="btn btn-outline-secondary" onclick="scroll_to_top()" type="button"><i class="bi bi-caret-up-fill"></i></button>
+        </div>
     </div>
 </nav>
 
+
+
 <script>
     function scroll_to_top() {
-        window.scroll({top: 0, behavior: 'smooth'});
+        window.scroll({ top: 0, behavior: 'smooth' });
     }
 
     function search() {
@@ -25,5 +35,4 @@
             alert("!");
         }
     }
-
 </script>
