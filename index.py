@@ -30,18 +30,21 @@ def connect_db():
 def parse_query(query):
     operators = ["since", "until", "by", "title"]
     parsed_query = {}
-    search_term = None
+    search_terms = []
 
     query_parts = query.split()
-    if query_parts:
-        search_term = query_parts.pop(0)  # 検索語を取得
-
-    for part in query_parts:
+    while query_parts:
+        part = query_parts.pop(0)
+        is_operator = False
         for operator in operators:
             if part.startswith(operator + ':'):
                 parsed_query[operator] = part.split(':')[1]
+                is_operator = True
                 break
-    return search_term, parsed_query
+        if not is_operator:
+            search_terms.append(part)
+
+    return search_terms if search_terms else [''], parsed_query
 
 app = Flask(__name__)
 
@@ -96,6 +99,9 @@ def view_search_results():
     if query:
         conn = connect_db()
 
+        # parse_query 関数を使用して検索語と演算子の値を取得
+        search_terms, parsed_query = parse_query(query)
+
         # query and parameters are Written by ChatGPT
         # 与えられた演算子が None の場合、その条件を無視する
         query_to_execute = """
@@ -110,12 +116,14 @@ def view_search_results():
             AND (article_title LIKE ? OR ? IS NULL)
         """
 
-        # parse_query 関数を使用して検索語と演算子の値を取得
-        search_term, parsed_query = parse_query(query)
+        # AND Search
+        if len(search_terms) > 1:
+            for _ in search_terms[1:]:
+                query_to_execute += " AND article_text LIKE ?"
 
         # パラメータの設定
         parameters = [
-            "%" + search_term + "%",  # 検索語
+            "%" + search_terms[0] + "%",  # 検索語
             str(parsed_query.get("since", "2010-06-01")),  # since の値またはデフォルト値
             str(parsed_query.get("since", "2010-06-01")),  # since の値またはデフォルト値
             str(parsed_query.get("until", "2022-07-31")),  # until の値またはデフォルト値
@@ -125,6 +133,8 @@ def view_search_results():
             "%" + parsed_query.get("title", "") + "%",  # title の値または空文字列
             "%" + parsed_query.get("title", "") + "%"  # title の値または空文字列
         ]
+        if len(search_terms) > 1:
+            parameters.extend(["%" + term + "%" for term in search_terms[1:]])
 
         cur = conn.execute(query_to_execute, parameters)
 
