@@ -1,6 +1,6 @@
 <div class="article">
-    <h3><a href="/post/{{ article_id }}">{{ article_title }}</a></h3>
-    <h5 class="text-muted" title="{{ author_remote_addr }}">{{ author_name }} · {{ created_at }}</h5>
+    <h4><a class="link-offset-2" href="/post/{{ article_id }}">{{ article_title }}</a></h3>
+    <p class="text-secondary" title="{{ author_remote_addr }}"><i class="bi bi-person-fill"></i> {{ author_name }} <i class="bi bi-clock"></i> {{ created_at | weekday }}</p>
     <p>
         {{ article_text | break_line }}
     </p>

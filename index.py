@@ -50,6 +50,14 @@ app = Flask(__name__)
 def conv_br(text):
     return Markup(text.replace("\n", "<br>"))
 
+@app.template_filter("weekday")
+def convert_weekday(strftime):
+    datetime_parts = strftime.split(',')
+    weekday_number = datetime_parts[1]
+    weekdays = ["日", "月", "火", "水", "木", "金", "土"]
+    jp_string = f"{datetime_parts[0]}({weekdays[int(weekday_number)]}) {datetime_parts[2]}"
+    return jp_string
+
 
 @app.route("/")
 def top_page():
@@ -63,7 +71,7 @@ def view_article_list(yyyy=2022, mm=6):
     end_date = start_date + relativedelta(months=1)
     conn = connect_db()
     cur = conn.execute("select article_title, author_name, author_remote_addr, \
-     strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
+     strftime('%Y-%m-%d,%w,%H:%M:%S', created_at) as created_at, article_text, article_id \
       from articles where created_at between ? and ?", (start_date, end_date))
     res = cur.fetchall()
     cur.close()
@@ -74,7 +82,7 @@ def view_article_list(yyyy=2022, mm=6):
 def view_one_article(article_id):
     conn = connect_db()
     cur = conn.execute("select article_title, author_name, author_remote_addr, \
-     strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at, article_text, article_id \
+     strftime('%Y-%m-%d,%w,%H:%M:%S', created_at) as created_at, article_text, article_id \
       from articles where article_id == ?", (article_id,))
     res = cur.fetchone()
     cur.close()
@@ -92,7 +100,7 @@ def view_search_results():
         # 与えられた演算子が None の場合、その条件を無視する
         query_to_execute = """
             SELECT article_title, author_name, author_remote_addr,
-                strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at,
+                strftime('%Y-%m-%d,%w,%H:%M:%S', created_at) as created_at,
                 article_text, article_id
             FROM articles
             WHERE article_text LIKE ?

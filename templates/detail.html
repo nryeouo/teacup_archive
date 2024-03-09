@@ -19,8 +19,8 @@
                 <!-- Result -->
                 <div class="col">
                     <h3>{{ res.article_title }}</h3>
-                    <h5 class="text-muted">投稿者: {{ res.author_name }}<br>
-                        日時: {{ res.created_at }}</h5>
+                    <h5 class="text-secondary">投稿者: {{ res.author_name }}<br>
+                        日時: {{ res.created_at | weekday }}</h5>
                     <hr>
                     <p>{{ res.article_text | break_line }}</p>
                 </div>
