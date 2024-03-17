@@ -30,7 +30,7 @@
     function search() {
         const query = document.getElementById("searchBox").value;
         if (query) {
-            window.location = `/search?q=${query}`;
+            window.location = `/v1/search?q=${query}`;
         } else {
             alert("!");
         }
