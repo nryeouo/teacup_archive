@@ -41,7 +41,7 @@ def parse_query(query):
     return search_terms if search_terms else [''], parsed_query
 
 
-@app.route("/v1/<int:yyyy>/<int:mm>")
+@app.route("/<int:yyyy>/<int:mm>")
 def view_article_list(yyyy=2022, mm=6):
     start_date = datetime.datetime(yyyy, mm, 1, 0, 0, 0)
     end_date = start_date + relativedelta(months=1)
@@ -54,7 +54,7 @@ def view_article_list(yyyy=2022, mm=6):
     return render_template("index.html", rows=res, title=f"{yyyy}年{mm}月")
 
 
-@app.route("/v1/post/<article_id>")
+@app.route("/post/<article_id>")
 def view_one_article(article_id):
     conn = connect_db()
     cur = conn.execute("select article_title, author_name, author_remote_addr, \
@@ -65,7 +65,7 @@ def view_one_article(article_id):
     return render_template("detail.html", res=res, title="投稿詳細")
 
 
-@app.route("/v1/search")
+@app.route("/search")
 def view_search_results():
     query = request.args.get("q")
 

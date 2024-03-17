@@ -20,7 +20,7 @@ title_regex = r"^.+ title:(.+?($| ))"
 
 
 app = Flask(__name__)
-app.register_blueprint(v1)
+app.register_blueprint(v1, url_prefix="/v1")
 
 
 @app.template_filter("break_line")
